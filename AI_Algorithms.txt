@@ -1,0 +1,1118 @@
+1. BFS (Breadth-First Search)
+
+function BREADTH-FIRST-SEARCH(GRAPH):
+    NODE = INITIAL-STATE
+    FRONTIER = FIFO_QUEUE(NODE)
+    EXPLORED = {}
+    
+    while not EMPTY(FRONTIER):
+        NODE = DEQUEUE(FRONTIER)
+        if GOAL-TEST(NODE.STATE): return PRINT-SOLUTION(NODE)
+        
+        EXPLORED[NODE.STATE] = true
+        for CHILD in adjacent_nodes(NODE):
+            if CHILD.STATE not in EXPLORED or FRONTIER:
+                PARENT(CHILD) = NODE
+                ENQUEUE(CHILD, FRONTIER)
+    
+function PRINT-SOLUTION(NODE):
+    if NODE.PARENT: PRINT-SOLUTION(NODE.PARENT)
+    print(NODE)
+
+
+---------------------------------------------------------------------------------------
+
+2. DFS (Depth-First Search)
+
+function DEPTH-FIRST-SEARCH(GRAPH):
+    return RECURSIVE-DFS(INITIAL-STATE, GRAPH)
+
+function RECURSIVE-DFS(NODE, GRAPH):
+    if GOAL-TEST(NODE.STATE): return PRINT-SOLUTION(NODE)
+    
+    for CHILD in adjacent_nodes(NODE):
+        if CHILD.STATE not in EXPLORED:
+            PARENT(CHILD) = NODE
+            RESULT = RECURSIVE-DFS(CHILD, GRAPH)
+            if RESULT != failure: return RESULT
+    return failure
+
+function PRINT-SOLUTION(NODE):
+    if NODE.PARENT: PRINT-SOLUTION(NODE.PARENT)
+    print(NODE)
+
+
+
+----------------------------------------------------------------------------------------
+
+3. IDDLS (Iterative Deepening Depth-Limited Search)
+
+function ITERATIVE-DEEPENING-SEARCH(problem):
+    for DEPTH from 0 to ∞:
+        RESULT = DEPTH-LIMITED-SEARCH(problem, DEPTH)
+        if RESULT != cutoff: return RESULT
+
+function DEPTH-LIMITED-SEARCH(problem, LIMIT):
+    return RECURSIVE-DLS(INITIAL-STATE, problem, LIMIT)
+
+function RECURSIVE-DLS(NODE, problem, LIMIT):
+    if GOAL-TEST(NODE.STATE): return PRINT-SOLUTION(NODE)
+    if LIMIT == 0: return cutoff
+
+    for CHILD in adjacent_nodes(NODE):
+        RESULT = RECURSIVE-DLS(CHILD, problem, LIMIT-1)
+        if RESULT == cutoff: return cutoff
+        if RESULT != failure: return RESULT
+    return failure
+
+function PRINT-SOLUTION(NODE):
+    if NODE.PARENT: PRINT-SOLUTION(NODE.PARENT)
+    print(NODE)
+
+
+------------------------------------------------------------------------------------------
+
+4. GBFS (Greedy Best-First Search)
+
+function A-STAR-SEARCH(GRAPH):
+    NODE = INITIAL-STATE
+    FRONTIER = PRIORITY_QUEUE(NODE, heuristic(NODE))
+    
+    while not EMPTY(FRONTIER):
+        NODE = POP(FRONTIER)
+        if GOAL-TEST(NODE.STATE): return PRINT-SOLUTION(NODE)
+
+        for CHILD in adjacent_nodes(NODE):
+            CHILD.F = heuristic(CHILD)
+            if CHILD.STATE not in EXPLORED:
+                ENQUEUE(CHILD, FRONTIER)
+
+function PRINT-SOLUTION(NODE):
+    if NODE.PARENT: PRINT-SOLUTION(NODE.PARENT)
+    print(NODE)
+
+
+--------------------------------------------------------------------------------------------
+
+5.A Search*
+
+function A-STAR-SEARCH(GRAPH):
+    NODE = INITIAL-STATE
+    FRONTIER = PRIORITY_QUEUE(NODE, NODE.PATH-COST + heuristic(NODE))
+    EXPLORED = {}
+
+    while not EMPTY(FRONTIER):
+        NODE = POP(FRONTIER)
+        if GOAL-TEST(NODE.STATE): return PRINT-SOLUTION(NODE)
+        
+        EXPLORED[NODE.STATE] = true
+        for CHILD in adjacent_nodes(NODE):
+            CHILD.PATH-COST = NODE.PATH-COST + EDGE_COST(NODE, CHILD)
+            CHILD.F = CHILD.PATH-COST + heuristic(CHILD)
+            if CHILD.STATE not in EXPLORED or FRONTIER:
+                ENQUEUE(CHILD, FRONTIER)
+
+function PRINT-SOLUTION(NODE):
+    if NODE.PARENT: PRINT-SOLUTION(NODE.PARENT)
+    print(NODE)
+
+---------------------------------------------------------------------------------------------
+
+6. Genetic Algorithm
+
+function GENETIC-ALGORITHM(POPULATION):
+    for INDIVIDUAL in POPULATION:
+        INDIVIDUAL.FITNESS = FITNESS-FUNCTION(INDIVIDUAL)
+    
+    repeat:
+        NEW-POPULATION = []
+        for i in range(POPULATION.size // 2):
+            PARENT1, PARENT2 = RANDOM-SELECTION(POPULATION)
+            CHILD1, CHILD2 = REPRODUCE(PARENT1, PARENT2)
+            if RANDOM_PROBABILITY: CHILD1 = MUTATE(CHILD1)
+            if RANDOM_PROBABILITY: CHILD2 = MUTATE(CHILD2)
+            NEW-POPULATION.append(CHILD1, CHILD2)
+        POPULATION = NEW-POPULATION
+    return BEST(POPULATION)
+
+function FITNESS-FUNCTION(x):
+    FITNESS = 0
+    for i, j in combinations(x):
+        if x[i] != x[j] and abs(x[j] - x[i]) != j - i:
+            FITNESS += 1
+    return FITNESS
+
+function REPRODUCE(x, y):
+    c = random index
+    return (x[:c] + y[c:], y[:c] + x[c:])
+
+function MUTATE(x):
+    c = random index
+    x[c] = random_value
+    return x
+
+----------------------------------------------------------------------------------------------
+
+7. Alpha-Beta Pruning (for Tic-Tac-Toe)
+
+function ALPHA-BETA-FOR-TICTACTOE():
+    GRAPH = CONSTRUCT-GRAPH()
+    v = MAX-VALUE(INIT-STATE, GRAPH, -∞, +∞)
+    return ACTION(v)
+
+function MAX-VALUE(state, α, β):
+    if TERMINAL-TEST(state): return UTILITY(state)
+    v = -∞
+    for action in ACTIONS(state):
+        v = MAX(v, MIN-VALUE(RESULT(state, action), α, β))
+        if v >= β: return v
+        α = MAX(α, v)
+    return v
+
+function MIN-VALUE(state, α, β):
+    if TERMINAL-TEST(state): return UTILITY(state)
+    v = +∞
+    for action in ACTIONS(state):
+        v = MIN(v, MAX-VALUE(RESULT(state, action), α, β))
+        if v <= α: return v
+        β = MIN(β, v)
+    return v
+
+--------------------------------------------------------------------------------------------
+
+8. Backtracking (for CSP)
+
+function BACKTRACKING-SEARCH(CSP):
+    ASSIGNMENT = INIT-ASSIGN(CSP.VARIABLES)
+    return BACKTRACK(ASSIGNMENT, CSP)
+
+function BACKTRACK(ASSIGNMENT, CSP):
+    if IS-COMPLETE(ASSIGNMENT): return ASSIGNMENT
+    VAR = SELECT-UNASSIGNED-VARIABLE(CSP)
+    
+    for value in ORDER-DOMAIN-VALUES(VAR, ASSIGNMENT):
+        if IS-CONSISTENT(value, ASSIGNMENT):
+            ASSIGNMENT[VAR] = value
+            INFERENCES = INFERENCE(CSP, VAR, value)
+            if INFERENCES != failure:
+                RESULT = BACKTRACK(ASSIGNMENT, CSP)
+                if RESULT != failure: return RESULT
+            remove INFERENCES
+    return failure
+
+-------------------------------------------------------------------------------------------
+
+9. Cryptarithmetic (All-Diff)
+
+function solveCryptarithmetic(problem):
+    letters = extractUniqueLetters(problem)
+    usedDigits = [False] * 10
+    mapping = {}
+
+    if solve(letters, usedDigits, mapping, 0, problem):
+        printSolution(mapping)
+    else:
+        print("No solution found")
+
+function solve(letters, usedDigits, mapping, index, problem):
+    if index == len(letters): return isValid(mapping, problem)
+
+    for digit in range(10):
+        if not usedDigits[digit]:
+            usedDigits[digit] = True
+            mapping[letters[index]] = digit
+            if solve(letters, usedDigits, mapping, index + 1, problem): return True
+            usedDigits[digit] = False
+            mapping[letters[index]] = None
+    return False
+
+------------------------------------------------------------------------------------------
+12.Unification
+
+function UNIFY(x, y, θ):
+    if θ = failure:
+	 return failure
+    if x = y: 
+	return θ
+    if VARIABLE(x): 
+	return UNIFY-VAR(x, y, θ)
+    if VARIABLE(y):
+	 return UNIFY-VAR(y, x, θ)
+    if COMPOUND(x) and COMPOUND(y): 
+	return UNIFY(x.ARGS, y.ARGS, UNIFY(x.OP, y.OP, θ))
+    if LIST(x) and LIST(y): 
+	return UNIFY(x.REST, y.REST, UNIFY(x.FIRST, y.FIRST, θ))
+    return failure
+
+function UNIFY-VAR(var, x, θ):
+    if {var/val} ∈ θ: return UNIFY(val, x, θ)
+    if {x/val} ∈ θ: return UNIFY(var, val, θ)
+    if OCCUR-CHECK(var, x): return failure
+    return add {var/x} to θ
+
+-----------------------------------------------------------------------------------
+
+FOL
+Identify objects and relations (e.g., people, kinship).
+Define predicates and functions based on relationships.
+Write the concept in plain language (informally describe).
+Use quantifiers and variables to generalize (e.g., ∀, ∃, x, y).
+Combine predicates with logical connectives (∧, ∨, ¬, ⇒, ⇔).
+Ensure symmetry or inverse if required (e.g., Sibling, Parent-Child).
+Express disjoint or functional definitions (e.g., Male ⇔ ¬Female).
+
+
+
+
+**********************************************************************************************
+----------------------------------------------------------------------------------------
+1.BFS
+
+from collections import deque
+
+def bfs(graph, start, goal):
+    queue = deque([start])
+    explored = {start: None}
+    processed_nodes = [] 
+    while queue:
+        node = queue.popleft()
+        processed_nodes.append(node) 
+        print(f"Processing node: {node}") 
+        if node == goal:
+            path = []
+            while node is not None:
+                path.append(node)
+                node = explored[node]
+            return " -> ".join(reversed(path)), processed_nodes
+        for neighbor in graph.get(node, []):
+            if neighbor not in explored:
+                explored[neighbor] = node
+                queue.append(neighbor)
+
+    return "No path found", processed_nodes
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B', 'G'],
+    'E': ['B', 'H'],
+    'F': ['C', 'I'],
+    'G': ['D', 'J'],
+    'H': ['E', 'K'],
+    'I': ['F', 'K'],
+    'J': ['G', 'K'],
+    'K': ['H', 'I', 'J']
+}
+path, processed_nodes = bfs(graph, 'A', 'K')
+print(f"Shortest path from A to K: {path}")
+print(f"Processed nodes: {processed_nodes}")
+
+
+------------------------------------------------------------------------------------------
+
+2.DFS
+
+def dfs(graph, start, goal):
+    stack = [start]
+    explored = {start: None}
+    processed_nodes = [] 
+
+    while stack:
+        node = stack.pop()
+        processed_nodes.append(node) 
+        print(f"Processing node: {node}") 
+
+        if node == goal:
+            path = []
+            while node is not None:
+                path.append(node)
+                node = explored[node]
+            return " -> ".join(reversed(path)), processed_nodes
+
+        for neighbor in graph.get(node, []):
+            if neighbor not in explored:
+                explored[neighbor] = node
+                stack.append(neighbor)
+
+    return "No path found", processed_nodes
+
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B', 'G'],
+    'E': ['B', 'H'],
+    'F': ['C', 'I'],
+    'G': ['D', 'J'],
+    'H': ['E', 'K'],
+    'I': ['F', 'K'],
+    'J': ['G', 'K'],
+    'K': ['H', 'I', 'J']
+}
+path, processed_nodes = dfs(graph, 'A', 'K')
+print(f"Path from A to K: {path}")
+print(f"Processed nodes: {processed_nodes}")
+
+
+---------------------------------------------------------------------------------------------
+
+3.IDDLS
+
+class PuzzleState:
+    def __init__(self, board, empty_tile_pos, moves=0):
+        self.board = board
+        self.empty_tile_pos = empty_tile_pos
+        self.moves = moves
+
+    def is_goal(self, goal_state):
+        return self.board == goal_state
+
+    def get_possible_moves(self):
+        row, col = self.empty_tile_pos
+        directions = [(-1, 0), (0, -1), (1, 0), (0, 1)]
+        return [(row + dr, col + dc) for dr, dc in directions if 0 <= row + dr < 3 and 0 <= col + dc < 3]
+
+    def move_tile(self, new_empty_tile_pos):
+        new_row, new_col = new_empty_tile_pos
+        new_board = [list(row) for row in self.board]
+        new_board[self.empty_tile_pos[0]][self.empty_tile_pos[1]], new_board[new_row][new_col] = \
+            new_board[new_row][new_col], new_board[self.empty_tile_pos[0]][self.empty_tile_pos[1]]
+        return PuzzleState(new_board, new_empty_tile_pos)
+
+def DLS(state, goal_state, depth):
+    if state.is_goal(goal_state):
+        return state
+    if depth == 0:
+        return None
+    for new_empty_pos in state.get_possible_moves():
+        new_state = state.move_tile(new_empty_pos)
+        result = DLS(new_state, goal_state, depth - 1)
+        if result:
+            return result
+    return None
+
+def IDDLS(initial_board, goal_board):
+    empty_tile_pos = next((i, row.index(0)) for i, row in enumerate(initial_board) if 0 in row)
+    initial_state = PuzzleState(initial_board, empty_tile_pos)
+    depth = 0
+    while True:
+        result = DLS(initial_state, goal_board, depth)
+        if result:
+            return result, depth
+        depth += 1
+
+def print_board(board):
+    for row in board:
+        print(" ".join(map(str, row)))
+
+initial_state = [
+    [1, 2, 3],
+    [0, 4, 6],
+    [7, 5, 8]
+]
+
+goal_state = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 0]
+]
+
+solution, depth = IDDLS(initial_state, goal_state)
+if solution:
+    print(f"Solution found at depth: {depth}")
+    print_board(solution.board)
+else:
+    print("No path found")
+
+
+-------------------------------------------------------------------------------------------
+
+4.GBFS
+graph = {
+    'a': [("c", 4), ("d", 1)],
+    'b': [("e", 3), ("f", 1)],
+    'c': [],
+    'd': [],
+    'e': [("h", 5)],
+    'f': [("i", 2), ("g", 3)],
+    'g': [],
+    'h': [],
+    'i': [],
+    "s": [("a", 3), ("b", 2)]
+}
+
+heuristic = {
+    "a": 12,
+    "b": 4,
+    "c": 7,
+    "d": 3,
+    "e": 8,
+    "f": 2,
+    "h": 4,
+    "i": 9,
+    "s": 13,
+    "g": 0
+}
+
+start_node = "s"
+goal_node = "g"
+path = [start_node]
+
+def search_goal(curr_node):
+    if curr_node == goal_node:
+        return True
+    max_heuristic = float('inf')
+    next_node = None
+    for neighbor, _ in graph[curr_node]:
+        if heuristic[neighbor] <= max_heuristic:
+            next_node = neighbor
+            max_heuristic = heuristic[neighbor]
+    if next_node:
+        path.append(next_node)
+        return search_goal(next_node)
+    return False
+
+def calculate_cost(path):
+    total_cost = 0
+    for i in range(len(path) - 1):
+        for neighbor, cost in graph[path[i]]:
+            if neighbor == path[i+1]:
+                total_cost += cost
+                break
+    return total_cost
+if search_goal(start_node):
+    print(f"Path: {' -> '.join(path)}")
+    cost = calculate_cost(path)
+    print(f"Cost: {cost}")
+else:
+    print("Goal node not reachable")
+
+----------------------------------------------------------------------------------------
+
+5.A Star
+
+from heapq import heappop, heappush
+def a_star_search(graph: dict, start: str, goal: str, heuristic_values: dict):
+    open_list, closed_list = [(heuristic_values[start], start)], set()
+    parent_map = {start: None}
+    g_cost = {start: 0}
+
+    while open_list:
+        cost, node = heappop(open_list)
+
+        if node == goal:
+            path = []
+            while node is not None:
+                path.append(node)
+                node = parent_map[node]
+            path.reverse()
+            return path, g_cost[goal]
+
+        if node in closed_list:
+            continue
+
+        closed_list.add(node)
+        cost -= heuristic_values[node]
+
+        for neighbor, edge_cost in graph[node]:
+            if neighbor in closed_list:
+                continue
+
+            new_g_cost = g_cost[node] + edge_cost
+            if neighbor not in g_cost or new_g_cost < g_cost[neighbor]:
+                g_cost[neighbor] = new_g_cost
+                f_score = new_g_cost + heuristic_values[neighbor]
+                heappush(open_list, (f_score, neighbor))
+                parent_map[neighbor] = node
+
+    return None, -1
+
+EXAMPLE_GRAPH = {
+    'S': [('A', 4), ('B', 10), ('C', 11)],
+    'A': [('B', 8), ('D', 5)],
+    'B': [('D', 15)],
+    'C': [('D', 8), ('E', 20), ('F', 2)],
+    'D': [('F', 1), ('I', 20), ('H', 16)],
+    'E': [('G', 19)],
+    'F': [('G', 13)],
+    'H': [('J', 2), ('I', 1)],
+    'I': [('K', 13), ('G', 5), ('J', 5)],
+    'J': [('K', 7)],
+    'K': [('G', 16)]
+}
+
+EXAMPLE_HEURISTIC_VALUES = {
+    'S': 7,
+    'A': 8,
+    'B': 6,
+    'C': 5,
+    'D': 5,
+    'E': 3,
+    'F': 3,
+    'G': 0,
+    'H': 7,
+    'I': 4,
+    'J': 5,
+    'K': 3
+}
+
+path, cost = a_star_search(EXAMPLE_GRAPH, 'S', 'G', EXAMPLE_HEURISTIC_VALUES)
+if path:
+    print(f"Path: {' -> '.join(path)}")
+    print(f"Cost: {cost}")
+else:
+    print("No path found")
+
+-----------------------------------------------------------------------------------------
+
+
+6.Genetic Algorithm
+
+import random
+def generate_board_state():
+    return [random.randint(0, 7) for _ in range(8)]
+def calculate_fitness(board):
+    conflicts = 0
+    for i in range(8):
+        for j in range(i + 1, 8):
+            if board[i] == board[j] or abs(board[i] - board[j]) == j - i:
+                conflicts += 1
+    return 28 - conflicts
+def crossover(parent1, parent2):
+    crossover_point = random.randint(1, 7)
+    child = parent1[:crossover_point] + parent2[crossover_point:]
+    return child
+def mutate(board_state):
+    pos1, pos2 = random.sample(range(8), 2)
+    board_state[pos1], board_state[pos2] = board_state[pos2], board_state[pos1]
+    return board_state
+
+def tournament_selection(population):
+    tournament_size = 5
+    tournament = random.sample(population, tournament_size)
+    return max(tournament, key=lambda x: x[1])
+
+population = [(generate_board_state(), 0) for _ in range(50)]
+
+for generation in range(1000):
+    print("Iteration :- ", generation + 1)
+    population = [(board_state, calculate_fitness(board_state)) for board_state, _ in population]
+    print("Initial Population :- ")
+    for i in population:
+        print(i)
+    best_board_state = max(population, key=lambda x: x[1])[0]
+    if calculate_fitness(best_board_state) == 28:
+        print("Goal reached at generation:", generation)
+        break
+    new_population = []
+    new_population.append(max(population, key=lambda x: x[1]))
+    print("Mutated Children :- ")
+    while len(new_population) < 50:
+        parent1 = tournament_selection(population)
+        parent2 = tournament_selection(population)
+        child = crossover(parent1[0], parent2[0])
+        child = mutate(child)
+        print(child)
+        new_population.append((child, 0))
+    population = new_population
+
+best_board_state
+
+
+--------------------------------------------------------------------------------------------
+
+7.Alpha Beta pruning
+
+import math
+
+PLAYER_X, PLAYER_O, EMPTY = 'X', 'O', '-'
+pruned_nodes = {}
+
+def print_board(board):
+    for row in board:
+        print(' '.join(row))
+    print()
+
+def check_winner(board):
+    for i in range(3):
+        if board[i][0] == board[i][1] == board[i][2] != EMPTY:
+            return board[i][0]
+        if board[0][i] == board[1][i] == board[2][i] != EMPTY:
+            return board[0][i]
+    if board[0][0] == board[1][1] == board[2][2] != EMPTY:
+        return board[0][0]
+    if board[0][2] == board[1][1] == board[2][0] != EMPTY:
+        return board[0][2]
+    return None
+
+def is_draw(board):
+    return all(cell != EMPTY for row in board for cell in row) and check_winner(board) is None
+
+def utility(board):
+    winner = check_winner(board)
+    return (1 if winner == PLAYER_X else -1 if winner == PLAYER_O else 0)
+
+def terminal_test(board):
+    return check_winner(board) is not None or is_draw(board)
+
+def get_possible_moves(board):
+    return [(i, j) for i in range(3) for j in range(3) if board[i][j] == EMPTY]
+
+def alpha_beta_search(board, depth, alpha, beta, maximizing_player):
+    if terminal_test(board) or depth == 0:
+        return utility(board), None
+    
+    best_move = None
+    for i, j in get_possible_moves(board):
+        board[i][j] = PLAYER_X if maximizing_player else PLAYER_O
+        eval, _ = alpha_beta_search(board, depth - 1, alpha, beta, not maximizing_player)
+        board[i][j] = EMPTY
+        
+        if maximizing_player:
+            if eval > alpha: alpha, best_move = eval, (i, j)
+            if beta <= alpha: 
+                pruned_nodes[(i, j)] = (alpha, beta)
+                break
+        else:
+            if eval < beta: beta, best_move = eval, (i, j)
+            if beta <= alpha: 
+                pruned_nodes[(i, j)] = (alpha, beta)
+                break
+            
+    return (alpha if maximizing_player else beta), best_move
+
+def play_game(initial_board):
+    board = [row[:] for row in initial_board]
+    print("Initial board:")
+    print_board(board)
+    
+    alpha, move = alpha_beta_search(board, depth=9, alpha=-math.inf, beta=math.inf, maximizing_player=True)
+    if move:
+        board[move[0]][move[1]] = PLAYER_X
+        print(f"Best move for X: {move}")
+    else:
+        print("No valid moves available.")
+    
+    print("Final board:")
+    print_board(board)
+    print(f"Alpha value at root node: {alpha if move else 'N/A'}")
+    print(f"Beta value at root node: {0 if move else 'N/A'}")
+
+    if pruned_nodes:
+        print("Pruned nodes and their alpha-beta values:")
+        for node, values in pruned_nodes.items():
+            print(f"Node: {node}, Alpha: {values[0]}, Beta: {values[1]}")
+
+# Initial board setup
+initial_board = [
+    [PLAYER_X, PLAYER_O, EMPTY],
+    [EMPTY, PLAYER_X, EMPTY],
+    [EMPTY, EMPTY, PLAYER_O]
+]
+
+play_game(initial_board)
+
+-----------------------------------------------------------------------------------------------
+
+8. MapColoring
+
+from collections import deque
+
+def solve_map_coloring(graph, colors):
+    def backtrack(assignment):
+        if len(assignment) == len(graph):
+            return assignment
+        var = min((v for v in graph if v not in assignment), key=lambda v: len(domains[v]))
+        for value in domains[var]:
+            if all(assignment.get(nei) != value for nei in graph[var]):
+                assignment[var] = value
+                if backtrack(assignment):
+                    return assignment
+                del assignment[var]
+        return None
+
+    domains = {node: set(colors) for node in graph}
+    return backtrack({}) or "No solution exists for the given map."
+
+if __name__ == "__main__":
+    graph = {
+        'wa': {'nt', 'sa'}, 'nt': {'wa', 'sa', 'q'}, 'q': {'nt', 'sa', 'nsw'},
+        'nsw': {'q', 'sa', 'v'}, 'v': {'sa', 'nsw'}, 'sa': {'wa', 'nt', 'q', 'nsw', 'v'}, 't': set()
+    }
+    colors = {'Red', 'Green', 'Blue'}
+    solution = solve_map_coloring(graph, colors)
+    
+    if isinstance(solution, dict):
+        print("Solution found:")
+        for region, color in solution.items():
+            print(f"{region.upper()}: {color}")
+    else:
+        print(solution)
+
+---------------------------------------------------------------------------------------------
+
+9.Cryptarithmetic
+
+def solveCryptarithmetic(problem):
+    letters = extractUniqueLetters(problem)
+    usedDigits = [False] * 10
+    mapping = {letter: None for letter in letters}
+    
+    if solve(letters, usedDigits, mapping, 0, problem):
+        printSolution(mapping)
+    else:
+        print("No solution found")
+
+def solve(letters, usedDigits, mapping, index, problem):
+    if index == len(letters):
+        return isValid(mapping, problem)
+
+    for digit in range(10):
+        if not usedDigits[digit]:
+            usedDigits[digit] = True
+            mapping[letters[index]] = digit
+            
+            if solve(letters, usedDigits, mapping, index + 1, problem):
+                return True
+            
+            usedDigits[digit] = False
+            mapping[letters[index]] = None
+
+    return False
+
+def isValid(mapping, problem):
+    translated_problem = problem
+    for letter, digit in mapping.items():
+        translated_problem = translated_problem.replace(letter, str(digit))
+    
+    try:
+        return eval(translated_problem)
+    except Exception:
+        return False
+
+def extractUniqueLetters(problem):
+    return list(set(filter(str.isalpha, problem)))
+
+def printSolution(mapping):
+    print("Solution:")
+    for letter, digit in mapping.items():
+        print(f"{letter} -> {digit}")
+
+
+problem ="SEND+MORE==MONEY"
+solveCryptarithmetic(problem)
+--------------------------------------------------------------------------------------------
+10. FOL
+
+class Constant:
+    def __init__(self, name):
+        self.name = str(name)
+        
+    def __repr__(self):
+        return self.name
+
+class Predicate:
+    def __init__(self, name, *args):
+        self.name = name
+        self.args = args
+        
+    def __repr__(self):
+        return f"{self.name}({', '.join(map(str, self.args))})"
+
+class Quantifier:
+    def __init__(self, quantifier, variable, statement):
+        self.quantifier = quantifier
+        self.variable = variable
+        self.statement = statement
+        
+    def __repr__(self):
+        return f"{self.quantifier}{self.variable} ({self.statement})"
+
+class LogicalConnective:
+    def __init__(self, connective, left, right):
+        self.connective = connective
+        self.left = left
+        self.right = right
+        
+    def __repr__(self):
+        return f"({self.left} {self.connective} {self.right})"
+
+
+Jack = Constant("Jack")
+Curiosity = Constant("Curiosity")
+Tuna = Constant("Tuna")
+
+def animal(y):
+    return Predicate("Animal", y)
+
+def loves(x, y):
+    return Predicate("Loves", x, y)
+
+def kills(x, y):
+    return Predicate("Kills", x, y)
+
+
+everyone_loves_animals = Quantifier("∀", "x",
+    LogicalConnective("→",
+        Quantifier("∀", "y", LogicalConnective("→", animal(Constant("y")), loves(Constant("x"), Constant("y")))),
+        Quantifier("∃", "z", loves(Constant("z"), Constant("x")))
+    )
+)
+
+
+anyone_kills_animal = Quantifier("∀", "x",
+    LogicalConnective("→",
+        Quantifier("∃", "y", LogicalConnective("∧", animal(Constant("y")), kills(Constant("x"), Constant("y")))),
+        Quantifier("∀", "z", Predicate("¬", loves(Constant("z"), Constant("x"))))
+    )
+)
+
+jack_loves_all_animals = Quantifier("∀", "y", loves(Jack, Constant("y")))
+
+either_jack_or_curiosity_killed = LogicalConnective("∨", kills(Jack, Tuna), kills(Curiosity, Tuna))
+
+did_curiosity_kill_cat = Predicate('¬',kills(Curiosity, Tuna))
+
+tunacatis_animal=Quantifier('∀','x',LogicalConnective('→',Predicate('Cat',Constant('x')),animal(Constant('x'))))
+
+print("1. Everyone who loves all animals is loved by someone:\n", everyone_loves_animals)
+print("2. Anyone who kills an animal is loved by no one:\n", anyone_kills_animal)
+print("3. Jack loves all animals:\n", jack_loves_all_animals)
+print("4. Either Jack or Curiosity killed the cat named Tuna:\n", either_jack_or_curiosity_killed)
+print("5. Did Curiosity kill the cat?\n", did_curiosity_kill_cat)
+print("6",Predicate('Cat',Constant('Tuna')))
+print("7",tunacatis_animal)
+
+
+-------------------------------
+
+
+
+import re
+
+def classify_fol(fol_sentence):
+    constants = []
+    variables = []
+    predicates = []
+    functions = []
+    quantifiers = []
+    connectives = []
+    implications = []
+
+    constants_pattern = r"\b[A-Z][a-zA-Z0-9]*\b"
+    variables_pattern = r"\b[a-z]\b"
+    predicates_functions_pattern = r"\b([A-Za-z]+)\(([a-zA-Z0-9, ]+)\)"
+    quantifiers_pattern = r"(∀|∃)"
+    connectives_pattern = r"(and|or|not|→|∨|∧)"
+
+    constants = re.findall(constants_pattern, fol_sentence)
+    
+    variables = re.findall(variables_pattern, fol_sentence)
+    
+    matches = re.findall(predicates_functions_pattern, fol_sentence)
+    for match in matches:
+        func_name = match[0]
+        params = match[1].split(',')
+        functions.append(func_name)
+        predicates.append(func_name)  
+        
+        for param in params:
+            param = param.strip()
+            if re.match(constants_pattern, param):
+                constants.append(param)
+            elif re.match(variables_pattern, param):
+                variables.append(param)
+
+    quantifiers = re.findall(quantifiers_pattern, fol_sentence)
+
+    connectives = re.findall(connectives_pattern, fol_sentence)
+
+    implications = re.findall(r"→", fol_sentence)
+
+    result = {
+        "constants": list(set(constants)), 
+        "variables": list(set(variables)), 
+        "predicates": list(set(predicates)),
+        "functions": list(set(functions)),
+        "quantifiers": list(set(quantifiers)),
+        "connectives": list(set(connectives)),
+        "implications": len(implications) > 0  
+    }
+    
+    return result
+
+
+# Function to convert a sentence into FOL
+def convert_to_fol(sentence):
+    sentence = sentence.strip().lower()
+    
+    fol_rules = {
+        r"(.+) was a (.+)\.": lambda subject, predicate: f"{predicate.capitalize()}({subject.capitalize()})",
+        r"all (.+) were (.+)\.": lambda group1, group2: f"∀x ({group1.capitalize()}(x) → {group2.capitalize()}(x))",
+        r"everyone is legal to someone\.": lambda: "∀x ∃y Legal(x, y)",
+        r"(.+) tried to (.+) (.+)\.": lambda subject, action, target: f"Tried{action.capitalize()}({subject.capitalize()}, {target.capitalize()})",
+        r"all men are people\.": lambda: "∀x (Man(x) → Person(x))",
+        r"all romans were loyal to (.+) or hated him\.": lambda target: f"∀x (Roman(x) → (LoyalTo(x, {target.capitalize()}) ∨ Hate(x, {target.capitalize()})))",
+        r"people only try to (.+) if they are not loyal to\." : lambda action: f"∀x ∀y (Person(x) ∧ Try{action.capitalize()}(x, y) → ¬LoyalTo(x, y))"
+    }
+    for pattern, fol_lambda in fol_rules.items():
+        match = re.match(pattern, sentence)
+        if match:
+            return fol_lambda(*match.groups())
+        
+    
+    return "No FOL conversion rule found."
+
+sentences = [
+    "Marcus was a man.",
+    "Marcus was a Pompian.",
+    "All Pompians were Romans.",
+    "Caeser was a ruler.",
+    "Everyone is legal to someone.",
+    "Marcus tried to assassinate Caeser.",
+    "All men are people.",
+    "All Romans were loyal to Caeser or hated him.",
+    "People only try to assassinate if they are not loyal to."
+]
+
+for sentence in sentences:
+    fol_sentence = convert_to_fol(sentence)
+    print(f"\n\nOriginal: {sentence}\nFOL: {fol_sentence}\nIt has")
+    print(classify_fol(fol_sentence))
+-----------------------------------------------------------------------------------------------
+
+12.Unification
+
+import re
+
+def is_function(sentence):
+    """Check if the sentence contains a function and extract function name and parameters."""
+    match = re.match(r'(\w+)\((.*)\)', sentence)
+    if match:
+        function_name = match.group(1)
+        parameters = match.group(2).split(',')
+        return function_name, [param.strip() for param in parameters]
+    return None
+
+def replace_with_theta(value, theta):
+    """Recursively replace values in theta with their corresponding keys."""
+    # Replace with substitutions from theta, both keys and values
+    while value in theta:
+        value = theta[value]
+    return value
+
+def unify_parameters(param1, param2, theta={}):
+    """Unify two parameters. At least one must be a variable (uppercase or lowercase)."""
+    param1 = replace_with_theta(param1, theta)
+    param2 = replace_with_theta(param2, theta)
+
+    if param1 == param2:
+        return theta  # No unification needed
+    elif is_variable(param1) and (not is_variable(param2) or is_function(param2)):
+        return unify_var(param1, param2, theta)
+    elif is_variable(param2) and (not is_variable(param1) or is_function(param1)):
+        return unify_var(param2, param1, theta)
+    elif is_function(param1) and is_function(param2):
+        name1, params1 = is_function(param1)
+        name2, params2 = is_function(param2)
+
+        if name1 != name2 or len(params1) != len(params2):
+            return "failure"
+
+        # Unify each parameter
+        for p1, p2 in zip(params1, params2):
+            result = unify_parameters(p1, p2, theta)
+            if result == "failure":
+                return "failure"
+
+        # Handle the parameter substitutions for functions
+        for i in range(len(params1)):
+            if is_function(params1[i]) and is_function(params2[i]):
+                # Unify their parameters
+                inner_theta = unify_parameters(params1[i], params2[i], theta)
+                if inner_theta == "failure":
+                    return "failure"
+                theta.update(inner_theta)
+
+                # Now replace parameters in theta
+                for j in range(len(params1)):
+                    # Replace parameters with corresponding values or keys
+                    params1[j] = replace_with_theta(params1[j], theta)
+                    params2[j] = replace_with_theta(params2[j], theta)
+
+        return theta
+
+    return "failure"
+
+def unify_var(var, value, theta):
+    """Unify a variable with a value. If already in the substitution map, check consistency."""
+    if var in theta:
+        return unify_parameters(theta[var], value, theta)
+    elif value in theta:
+        return unify_parameters(var, theta[value], theta)
+    else:
+        theta[var] = value
+        print(f"{var}/{value}")  # Print the unification step
+        return theta
+
+def is_variable(x):
+    """Check if the term is a variable (by convention, lowercase or uppercase letters represent variables)."""
+    return type(x) == str and len(x) == 1 and (x.islower() or x.isupper())
+
+def unify_sentences(sentence1, sentence2):
+    """Unify two sentences if they are functions with the same name. Handles any number of parameters."""
+    func1 = is_function(sentence1)
+    func2 = is_function(sentence2)
+
+    if func1 and func2:
+        name1, params1 = func1
+        name2, params2 = func2
+
+        # Check if function names are the same
+        if name1 != name2 or len(params1) != len(params2):
+            return "failure"
+
+        theta = {}
+        for p1, p2 in zip(params1, params2):
+            result = unify_parameters(p1, p2, theta)
+            if result == "failure":
+                return "failure"
+
+        # Final cleanup of theta to replace all instances
+        for key in list(theta.keys()):
+            theta[key] = replace_with_theta(theta[key], theta)
+
+        return theta
+    return "failure"
+
+# Testing the implementation
+sentence1 = "Prime(13)"
+sentence2 = "Prime(y)"
+
+sentence3 = "Knows(John, x)"
+sentence4 = "Knows(y, Mother(y))"
+
+sentence5 = "pro(b(x), X, f(g(Z)))"
+sentence6 = "pro(Z, f(Y), f(Y))"
+
+sentence7 = "Quick(a, g(x, a), f(y))"
+sentence8 = "Quick(a, g(f(b), a), x)"
+
+print("Unifying Prime(13) and Prime(y):")
+result1 = unify_sentences(sentence1, sentence2)  # Expected output: y/13
+print(result1)
+
+print("\nUnifying Knows(John, x) and Knows(y, Mother(y)):")
+result2 = unify_sentences(sentence3, sentence4)  # Expected output: y/John, x/Mother(John)
+print(result2)
+
+print("\nUnifying pro(b(x), X, f(g(Z))) and pro(Z, f(Y), f(Y)):")
+result3 = unify_sentences(sentence5, sentence6)  # Expected output: {'Z': 'b(x)', 'X': 'f(Y)', 'Y': 'g(b)'}
+print(result3)
+
+print("\nUnifying Quick(a, g(x, a), f(y)) and Quick(a, g(f(b), a), x):")
+result4 = unify_sentences(sentence7, sentence8)  # Expected output: failure
+print(result4)
+
+
+*********************************************THE END******************************************
